@@ -11,6 +11,12 @@ use itertools::Itertools;
 #[derive(Constructor, Clone, Debug)]
 pub struct LLParseTable(HashMap<String, HashMap<String, Rule>>);
 
+impl LLParseTable {
+    pub fn table(&self) -> &HashMap<String, HashMap<String, Rule>> {
+        &self.0
+    }
+}
+
 /// Simply displays an LL(1) parse table by describing, for each non-terminal row
 /// and each terminal column, which production rule should be applied.
 impl fmt::Display for LLParseTable {
@@ -184,6 +190,7 @@ impl Grammar {
             .collect()
     }
 
+    /// Finds the predicts sets for all non-terminals in the grammar.
     pub fn predicts(&self) -> HashMap<String, HashSet<Predict>> {
         self.non_terminals()
             .iter()
@@ -194,6 +201,9 @@ impl Grammar {
             .collect()
     }
 
+    /// For a given non-terminal, finds the set of terminals which appear at
+    /// the beginning of some string derived from the non-terminal, along with
+    /// the production rule which would generate it.
     fn rule_predicts(&self, non_terminal: String) -> HashSet<Predict> {
         let non_terminals = self.non_terminals();
 
@@ -216,6 +226,8 @@ impl Grammar {
             .collect()
     }
 
+    /// Determines the set of terminals that can appear immediately to the right of
+    /// each non-terminal in some sequential form derived from the start symbol.
     pub fn follows(&self) -> HashMap<String, HashSet<String>> {
         self.non_terminals()
             .iter()
@@ -226,6 +238,9 @@ impl Grammar {
             .collect()
     }
 
+    /// For a given non-terminal, finds the set of all terminals which can appear
+    /// immediately to the right of the non-terminal in some sequential form derived
+    /// from the start symbol.
     pub fn follows_non_terminal(&self, non_terminal: String) -> HashSet<String> {
         let non_terminals = self.non_terminals();
 
@@ -293,14 +308,17 @@ impl Grammar {
                     .iter()
                     .map(|p| (p.terminal.clone(), p.rule.clone()))
                     .collect::<HashMap<_, _>>()
-                )
-            })
+                )})
             .collect::<HashMap<_, _>>())
         
         // !TODO
         // Any time there is an empty string ε in the PREDICTS set of a non-terminal,
         // we take the FOLLOWS of that non-terminal row and use its terminals to
         // indicate which columns to use.
+    }
+
+    pub fn start(&self) -> &String {
+        &self.start
     }
 }
 
@@ -365,5 +383,13 @@ impl Rule {
                 .map(|&s| s.to_string())
                 .collect()
         )
+    }
+
+    pub fn production(&self) -> Vec<String> {
+        self.production.clone()
+    }
+
+    pub fn non_terminal(&self) -> String {
+        self.non_terminal.clone()
     }
 }

@@ -1,3 +1,4 @@
+use codegen::{CodeGenConfig, ParserType, TargetLanguage};
 use grammar::{Grammar, Rule};
 
 mod tests;
@@ -21,7 +22,8 @@ fn main() {
             Rule::from("C", vec!["f", "g"]),
             Rule::from("E", vec!["a"]),
             Rule::from("A", vec!["h"]),
-            Rule::from("O", vec!["j"])
+            Rule::from("O", vec!["j"]),
+            Rule::from("O", vec!["B"])
         ]
     );
 
@@ -43,4 +45,11 @@ fn main() {
     println!("Follows: \n{:#?}", factored_grammar.follows());
 
     println!("Parse Table: \n{}", factored_grammar.construct_ll_parse_table());
+
+    let target_language = TargetLanguage::Rust;
+    let parser_type = ParserType::LL;
+    let config = CodeGenConfig::new(target_language, parser_type);
+    let generated_code = config.generate(&grammar);
+
+    println!("Generated code:\n\n{}", generated_code);
 }
